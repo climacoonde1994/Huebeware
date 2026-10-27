@@ -1,0 +1,117 @@
+<section class="page-head">
+  <div class="container">
+    <app-order-steps [current]="1" />
+    <h1>Create an order</h1>
+    <p>Pick the items and quantities you need. You'll add your contact details and choose pick-up or delivery next.</p>
+  </div>
+</section>
+
+<div class="container layout">
+  <!-- Product picker -->
+  <section class="picker" aria-label="Products">
+    <div class="tools">
+      <div class="search">
+        <label for="order-search" class="sr-only">Search products</label>
+        <input id="order-search" type="search" placeholder="Search item or size, e.g. 2mm, elbow, 12mm"
+               [value]="catalog.query()" (input)="catalog.search($any($event.target).value)" />
+        @if (catalog.query()) {
+          <button type="button" class="clear" (click)="catalog.search('')" aria-label="Clear search">×</button>
+        }
+      </div>
+      <div class="chips" role="tablist" aria-label="Filter by category">
+        <button type="button" role="tab" [class.active]="catalog.selectedId() === 'all'" (click)="catalog.selectedId.set('all')">All</button>
+        @for (c of catalog.categories; track c.id) {
+          <button type="button" role="tab" [class.active]="catalog.selectedId() === c.id" (click)="catalog.selectedId.set(c.id)">{{ c.name }}</button>
+        }
+      </div>
+    </div>
+
+    @for (c of catalog.filtered(); track c.id) {
+      <div class="group">
+        <h2><app-category-icon [name]="c.icon" />{{ c.name }}</h2>
+        <ul>
+          @for (p of c.products; track p.id) {
+            @if (!p.priceOnRequest) {
+            <li [class.selected]="cart.qtyOf(p.id)">
+              <div class="info">
+                <strong>{{ p.name }}</strong>
+                <span>{{ p.size ?? '—' }}</span>
+              </div>
+              <div class="price">₱{{ price.priceOf(p) | number: '1.2-2' }}<small>/{{ p.unit ?? 'pc' }}</small></div>
+              <div class="qty">
+                @if (cart.qtyOf(p.id)) {
+                  <app-qty-stepper [value]="cart.qtyOf(p.id)" [label]="p.name + ' ' + (p.size ?? '')" (qtyChange)="cart.setQty(p.id, $event)" />
+                } @else {
+                  <button type="button" class="add" (click)="cart.add(p.id)" [attr.aria-label]="'Add ' + p.name + ' ' + (p.size ?? '')">Add</button>
+                }
+              </div>
+            </li>
+            }
+          }
+        </ul>
+      </div>
+    } @empty {
+      <p class="empty">No products match “{{ catalog.query() }}”. Try a shorter word like “pipe” or “paint”.</p>
+    }
+  </section>
+
+  <!-- Order summary -->
+  <aside class="summary" aria-label="Your order">
+    <div class="card">
+      <header>
+        <h2>Your order</h2>
+        @if (cart.itemCount()) {
+          <button type="button" class="link" (click)="cart.clear()">Clear all</button>
+        }
+      </header>
+
+      <div class="fulfil" role="radiogroup" aria-label="Pick-up or delivery">
+        <button type="button" role="radio" [attr.aria-checked]="price.mode() === 'cash'" [class.on]="price.mode() === 'cash'" (click)="price.set('cash')">
+          <strong>Pick-up</strong><span>Cash prices</span>
+        </button>
+        <button type="button" role="radio" [attr.aria-checked]="price.mode() === 'term'" [class.on]="price.mode() === 'term'" (click)="price.set('term')">
+          <strong>Delivery</strong><span>Term prices + fee</span>
+        </button>
+      </div>
+
+      @if (cart.itemCount()) {
+        <ul class="lines">
+          @for (l of cart.lines(); track l.productId) {
+            <li>
+              <div class="l-info">
+                <strong>{{ l.name }}</strong>
+                <span>{{ l.size }} · ₱{{ l.unitPrice | number: '1.2-2' }}/{{ l.unit }}</span>
+              </div>
+              <div class="l-row">
+                <app-qty-stepper [value]="l.quantity" [label]="l.name" (qtyChange)="cart.setQty(l.productId, $event)" />
+                <span class="l-total">₱{{ l.lineTotal | number: '1.2-2' }}</span>
+                <button type="button" class="remove" (click)="cart.remove(l.productId)" [attr.aria-label]="'Remove ' + l.name">×</button>
+              </div>
+            </li>
+          }
+        </ul>
+
+        <dl class="totals">
+          <div><dt>Subtotal ({{ cart.itemCount() }} items)</dt><dd>₱{{ cart.subtotal() | number: '1.2-2' }}</dd></div>
+          @if (price.mode() === 'term') {
+            <div class="muted"><dt>Delivery fee</dt><dd>Store will confirm</dd></div>
+          }
+        </dl>
+
+        <a class="btn btn-primary block" routerLink="/checkout">Continue to details →</a>
+      } @else {
+        <div class="empty-cart">
+          <p><strong>No items yet.</strong></p>
+          <p>Tap <em>Add</em> on any product to start your order.</p>
+        </div>
+      }
+    </div>
+  </aside>
+</div>
+
+@if (cart.itemCount()) {
+  <div class="mobile-bar">
+    <span><strong>{{ cart.itemCount() }}</strong> items · ₱{{ cart.subtotal() | number: '1.2-2' }}</span>
+    <a class="btn btn-primary" routerLink="/checkout">Continue →</a>
+  </div>
+}

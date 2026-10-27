@@ -1,0 +1,93 @@
+<section class="page-head">
+  <div class="container">
+    <app-order-steps [current]="3" />
+  </div>
+</section>
+
+<div class="container wrap">
+  @if (loading()) {
+    <p class="muted">Loading your order…</p>
+  } @else {
+  @if (result(); as r) {
+    <div class="hero-card">
+      <div class="check" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+      </div>
+      <div>
+        <h1>Order sent</h1>
+        <p>Thank you, {{ r.order.customer.name }}. We received your order and will contact you at <strong>{{ r.order.customer.mobile }}</strong> to confirm.</p>
+      </div>
+      <div class="order-no">
+        <span>Order number</span>
+        <strong>{{ r.orderNumber }}</strong>
+        <em class="status">Awaiting confirmation</em>
+      </div>
+    </div>
+
+    <div class="cols">
+      <section class="receipt" aria-label="Order details">
+        <header>
+          <h2>Order details</h2>
+          <span>{{ r.createdAt | date: 'MMM d, y, h:mm a' }}</span>
+        </header>
+        <table>
+          <thead><tr><th>Item</th><th class="num">Qty</th><th class="num">Price</th><th class="num">Total</th></tr></thead>
+          <tbody>
+            @for (l of r.order.lines; track l.productId) {
+              <tr>
+                <td><strong>{{ l.name }}</strong><small>{{ l.size }}</small></td>
+                <td class="num">{{ l.quantity | number }}</td>
+                <td class="num">₱{{ l.unitPrice | number: '1.2-2' }}</td>
+                <td class="num">₱{{ l.lineTotal | number: '1.2-2' }}</td>
+              </tr>
+            }
+          </tbody>
+          <tfoot>
+            <tr><td colspan="3">Subtotal ({{ r.order.fulfillment === 'delivery' ? 'delivery' : 'pick-up' }} prices)</td><td class="num">₱{{ r.order.subtotal | number: '1.2-2' }}</td></tr>
+            @if (r.order.fulfillment === 'delivery') {
+              <tr class="muted"><td colspan="3">Delivery fee</td><td class="num">To be confirmed</td></tr>
+            }
+          </tfoot>
+        </table>
+      </section>
+
+      <aside class="side">
+        <section class="box">
+          <h3>{{ r.order.fulfillment === 'delivery' ? 'Delivery' : 'Pick-up' }}</h3>
+          @if (r.order.fulfillment === 'delivery' && r.order.delivery; as d) {
+            <p>{{ d.street }}, {{ d.barangay }}<br>{{ d.city }}, {{ d.province }}</p>
+            @if (d.landmark) { <p class="muted">Landmark: {{ d.landmark }}</p> }
+            @if (d.receiverName) { <p class="muted">Receiver: {{ d.receiverName }} {{ d.receiverMobile }}</p> }
+          } @else {
+            <p>{{ store.address }}</p>
+          }
+          <p><strong>{{ r.order.preferredDate | date: 'EEE, MMM d, y' }}</strong> · {{ timeLabels[r.order.preferredTime] }}</p>
+          <p class="muted">Payment: {{ payLabels[r.order.paymentMethod] }}</p>
+          @if (r.order.notes) { <p class="muted">Notes: {{ r.order.notes }}</p> }
+        </section>
+
+        <section class="box next">
+          <h3>What happens next</h3>
+          <ol>
+            <li>We check stock and prices for your items.</li>
+            <li>We call or text you to confirm{{ r.order.fulfillment === 'delivery' ? ' the delivery fee and schedule' : ' when it is ready' }}.</li>
+            <li>{{ r.order.fulfillment === 'delivery' ? 'We deliver to your site.' : 'You pick up your order at the store.' }}</li>
+          </ol>
+        </section>
+
+        <div class="actions">
+          <button type="button" class="btn btn-dark" (click)="copySummary()">{{ copied() ? 'Copied ✓' : 'Copy order details' }}</button>
+          <a class="btn btn-primary" routerLink="/order">Start a new order</a>
+        </div>
+        <p class="muted small">Questions? Call {{ store.phone }} and give your order number.</p>
+      </aside>
+    </div>
+  } @else {
+    <div class="missing">
+      <h1>Order not found</h1>
+      <p>We couldn't find order {{ orderNumber() }} on this device. Call us at {{ store.phone }} if you need help.</p>
+      <a class="btn btn-primary" routerLink="/">Back to home</a>
+    </div>
+  }
+  }
+</div>

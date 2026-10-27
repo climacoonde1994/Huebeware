@@ -1,0 +1,185 @@
+<section class="page-head">
+  <div class="container">
+    <app-order-steps [current]="2" />
+    <h1>Details &amp; delivery</h1>
+    <p>Tell us who you are and how you want to get your materials. We'll confirm stock and the final amount before we process your order.</p>
+  </div>
+</section>
+
+@if (cart.itemCount() === 0) {
+  <div class="container empty">
+    <h2>Your order is empty</h2>
+    <p>Add some items first, then come back here to send your order.</p>
+    <a class="btn btn-primary" routerLink="/order">Choose items</a>
+  </div>
+} @else {
+  <form class="container layout" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <div class="fields">
+
+      <!-- Contact -->
+      <fieldset formGroupName="customer">
+        <legend>Contact details</legend>
+        <div class="grid">
+          <label class="field">
+            <span>Full name *</span>
+            <input id="co-name" formControlName="name" autocomplete="name" placeholder="Juan Dela Cruz" />
+            @if (showError(form.get('customer.name'))) { <small class="err">Enter your name.</small> }
+          </label>
+          <label class="field">
+            <span>Mobile number *</span>
+            <input id="co-mobile" formControlName="mobile" inputmode="tel" autocomplete="tel" placeholder="09171234567" />
+            @if (showError(form.get('customer.mobile'))) { <small class="err">Use 11 digits starting with 09, e.g. 09171234567.</small> }
+          </label>
+          <label class="field">
+            <span>Email <em>(optional)</em></span>
+            <input id="co-email" formControlName="email" type="email" autocomplete="email" placeholder="you@email.com" />
+            @if (showError(form.get('customer.email'))) { <small class="err">Check the email address.</small> }
+          </label>
+          <label class="field">
+            <span>Company / project <em>(optional)</em></span>
+            <input id="co-company" formControlName="company" autocomplete="organization" placeholder="e.g. ABC Builders" />
+          </label>
+        </div>
+      </fieldset>
+
+      <!-- Pick-up or delivery -->
+      <fieldset>
+        <legend>Pick-up or delivery</legend>
+        <div class="choice">
+          <label class="option" [class.on]="!isDelivery">
+            <input id="co-pickup" type="radio" formControlName="fulfillment" value="pickup" />
+            <strong>Pick-up at store</strong>
+            <span>Cash / pick-up prices. Collect at {{ store.address }}.</span>
+          </label>
+          <label class="option" [class.on]="isDelivery">
+            <input id="co-delivery" type="radio" formControlName="fulfillment" value="delivery" />
+            <strong>Deliver to my site</strong>
+            <span>Term / delivery prices. The delivery fee is confirmed by the store.</span>
+          </label>
+        </div>
+
+        <div class="grid">
+          <label class="field">
+            <span>Preferred {{ isDelivery ? 'delivery' : 'pick-up' }} date *</span>
+            <input id="co-date" type="date" formControlName="preferredDate" [min]="isDelivery ? tomorrow : today" />
+            @if (showError(form.get('preferredDate'))) { <small class="err">Choose a date.</small> }
+          </label>
+          <label class="field">
+            <span>Preferred time *</span>
+            <select id="co-time" formControlName="preferredTime">
+              @for (t of timeSlots; track t.value) { <option [value]="t.value">{{ t.label }}</option> }
+            </select>
+          </label>
+        </div>
+
+        @if (isDelivery) {
+          <div class="delivery" formGroupName="delivery">
+            <h3>Delivery address</h3>
+            <div class="grid">
+              <label class="field wide">
+                <span>House / lot no., street *</span>
+                <input id="co-street" formControlName="street" autocomplete="address-line1" placeholder="Lot 12, Mabini St." />
+                @if (showError(form.get('delivery.street'))) { <small class="err">Enter the street address.</small> }
+              </label>
+              <label class="field">
+                <span>Barangay *</span>
+                <input id="co-brgy" formControlName="barangay" placeholder="Brgy. San Isidro" />
+                @if (showError(form.get('delivery.barangay'))) { <small class="err">Enter the barangay.</small> }
+              </label>
+              <label class="field">
+                <span>City / municipality *</span>
+                <input id="co-city" formControlName="city" autocomplete="address-level2" />
+                @if (showError(form.get('delivery.city'))) { <small class="err">Enter the city or municipality.</small> }
+              </label>
+              <label class="field">
+                <span>Province *</span>
+                <input id="co-prov" formControlName="province" autocomplete="address-level1" />
+                @if (showError(form.get('delivery.province'))) { <small class="err">Enter the province.</small> }
+              </label>
+              <label class="field">
+                <span>Landmark <em>(optional)</em></span>
+                <input id="co-landmark" formControlName="landmark" placeholder="Near the chapel" />
+              </label>
+              <label class="field">
+                <span>Person receiving <em>(optional)</em></span>
+                <input id="co-recv" formControlName="receiverName" placeholder="If not you" />
+              </label>
+              <label class="field">
+                <span>Receiver's mobile <em>(optional)</em></span>
+                <input id="co-recv-mobile" formControlName="receiverMobile" inputmode="tel" placeholder="09XXXXXXXXX" />
+                @if (showError(form.get('delivery.receiverMobile'))) { <small class="err">Use 11 digits starting with 09.</small> }
+              </label>
+            </div>
+
+            <div class="truck">
+              <span>Can a delivery truck reach the site?</span>
+              <div class="pills">
+                <label><input id="co-truck-any" type="radio" formControlName="truckAccess" value="any" /> Yes, any truck</label>
+                <label><input id="co-truck-small" type="radio" formControlName="truckAccess" value="small-only" /> Small vehicles only</label>
+                <label><input id="co-truck-unsure" type="radio" formControlName="truckAccess" value="unsure" /> Not sure</label>
+              </div>
+              <small class="hint">Long items like 6 m purlins, pipes and 20 ft bars need a truck with enough road access.</small>
+            </div>
+          </div>
+        }
+      </fieldset>
+
+      <!-- Payment -->
+      <fieldset>
+        <legend>Payment</legend>
+        <div class="pay">
+          @for (p of payments; track p.value) {
+            <label class="option small" [class.on]="form.controls.paymentMethod.value === p.value">
+              <input [id]="'co-pay-' + p.value" type="radio" formControlName="paymentMethod" [value]="p.value" />
+              <strong>{{ p.label }}</strong>
+              <span>{{ p.hint }}</span>
+            </label>
+          }
+        </div>
+        <label class="field">
+          <span>Notes for the store <em>(optional)</em></span>
+          <textarea id="co-notes" formControlName="notes" rows="3" placeholder="e.g. Cut flat bars to 10 ft, call before delivering"></textarea>
+        </label>
+      </fieldset>
+    </div>
+
+    <!-- Summary -->
+    <aside class="summary">
+      <div class="card">
+        <header>
+          <h2>Order summary</h2>
+          <a routerLink="/order" class="link">Edit items</a>
+        </header>
+        <ul class="lines">
+          @for (l of cart.lines(); track l.productId) {
+            <li>
+              <span class="q">{{ l.quantity }}×</span>
+              <span class="n"><strong>{{ l.name }}</strong><small>{{ l.size }}</small></span>
+              <span class="t">₱{{ l.lineTotal | number: '1.2-2' }}</span>
+            </li>
+          }
+        </ul>
+        <dl class="totals">
+          <div><dt>Subtotal <small>({{ isDelivery ? 'delivery' : 'pick-up' }} prices)</small></dt><dd>₱{{ cart.subtotal() | number: '1.2-2' }}</dd></div>
+          @if (isDelivery) {
+            <div class="muted"><dt>Delivery fee</dt><dd>To be confirmed</dd></div>
+          }
+          <div class="grand"><dt>Estimated total</dt><dd>₱{{ cart.subtotal() | number: '1.2-2' }}{{ isDelivery ? ' + fee' : '' }}</dd></div>
+        </dl>
+
+        <div class="send">
+          <label class="agree">
+            <input id="co-agree" type="checkbox" formControlName="agree" />
+            <span>I understand the store will confirm stock, final prices{{ isDelivery ? ' and the delivery fee' : '' }} before processing this order.</span>
+          </label>
+          @if (showError(form.controls.agree)) { <small class="err">Please tick this box to continue.</small> }
+          @if (error()) { <p class="err box" role="alert">{{ error() }}</p> }
+          <button class="btn btn-primary block" type="submit" [disabled]="sending()">
+            {{ sending() ? 'Sending order…' : 'Send order' }}
+          </button>
+          <small class="hint">No payment is taken now.</small>
+        </div>
+      </div>
+    </aside>
+  </form>
+}

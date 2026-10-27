@@ -1,0 +1,51 @@
+<section class="section catalog" id="catalog">
+  <div class="container">
+    <div class="head">
+      <div>
+        <span class="eyebrow">Shop all</span>
+        <h2 class="section-title">Products &amp; prices</h2>
+      </div>
+      <div class="controls">
+        <div class="seg" role="group" aria-label="Price type">
+          <button type="button" [class.active]="price.mode() === 'cash'" (click)="price.set('cash')">Pick-up (cash)</button>
+          <button type="button" [class.active]="price.mode() === 'term'" (click)="price.set('term')">Delivery (term)</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="chips" role="tablist" aria-label="Filter by category">
+      <button type="button" role="tab" [class.active]="catalog.selectedId() === 'all'"
+              (click)="catalog.selectedId.set('all')">All</button>
+      @for (c of catalog.categories; track c.id) {
+        <button type="button" role="tab" [class.active]="catalog.selectedId() === c.id"
+                (click)="catalog.selectedId.set(c.id)">{{ c.name }}</button>
+      }
+    </div>
+
+    @if (catalog.query()) {
+      <p class="result-note">
+        {{ catalog.resultCount() }} result(s) for “{{ catalog.query() }}”
+        <button type="button" class="link" (click)="catalog.search('')">Clear</button>
+      </p>
+    }
+
+    <div class="grid">
+      @for (c of catalog.filtered(); track c.id) {
+        @for (p of c.products; track p.id) {
+          <app-product-card [product]="p" [category]="c" />
+        }
+      } @empty {
+        <p class="empty">No products match your search. Try “cement”, “paint” or “pipe”.</p>
+      }
+    </div>
+
+    @if (cart.itemCount()) {
+      <div class="order-bar">
+        <span><strong>{{ cart.itemCount() }}</strong> item(s) · ₱{{ cart.subtotal() | number: '1.2-2' }}</span>
+        <a class="btn btn-primary" routerLink="/order">Review order →</a>
+      </div>
+    }
+
+    <p class="disclaimer">Prices are in Philippine pesos and may change without notice. Delivery fee is confirmed by the store. Tap any photo to see product details.</p>
+  </div>
+</section>

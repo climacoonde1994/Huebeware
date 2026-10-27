@@ -1,0 +1,92 @@
+:root {
+  // NorthHue palette: Navy blue · Orange · White
+  --navy: #0b2545;
+  --navy-2: #13315c;
+  --navy-900: #071a33;
+  --navy-50: #eef2f8;
+  --on-navy-muted: #b8c4d6;
+  --orange: #f57c00;
+  --orange-hover: #ff8f1f;
+  --orange-ink: #c25e00;   // orange dark enough for text on white
+  --orange-50: #fff3e6;
+  --white: #ffffff;
+
+  --ink: #0e2340;   // deep navy used for text and dark bands
+  --ink-2: #26334a;
+  --steel: #50607a;
+  --muted: #66738a;
+  --line: #e2e7ef;
+  --paper: #f6f8fb;
+  --accent: var(--orange);
+  --accent-ink: #ffffff;
+  --accent-soft: var(--orange-50);
+  --danger: #c8341f;
+  --radius: 10px;
+  --shadow: 0 1px 2px rgba(11, 37, 69, .06), 0 8px 24px rgba(11, 37, 69, .08);
+  --font: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  color: var(--ink);
+  background: var(--paper);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.5;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  letter-spacing: .01em;
+  line-height: 1.05;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+a { color: inherit; }
+
+button { font: inherit; cursor: pointer; }
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.section { padding: 72px 0; }
+
+.eyebrow {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--steel);
+  margin-bottom: 10px;
+}
+
+.section-title { font-size: clamp(32px, 4vw, 44px); }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: transform .15s ease, background .15s ease;
+  &:active { transform: translateY(1px); }
+}
+.btn-primary { background: var(--orange); color: var(--white); &:hover { background: var(--orange-hover); } }
+.btn-outline { background: var(--white); color: var(--navy); border: 1.5px solid var(--navy); &:hover { background: var(--navy); color: var(--white); } }
+.btn-ghost { background: transparent; color: var(--white); border: 1px solid rgba(255,255,255,.3); &:hover { background: rgba(255,255,255,.08); } }
+
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }

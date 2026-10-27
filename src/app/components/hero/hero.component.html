@@ -1,0 +1,44 @@
+<section class="hero" id="top">
+  <div class="container hero-inner">
+    <div class="copy">
+      <span class="tag">Cement · Roofing · Ceiling · Paint · Electrical · Plumbing</span>
+      <h1>Build your home.<br><span>Renovate with ease.</span></h1>
+      <p>
+        Everything you need to build or renovate a house — from cement and
+        roofing to PVC ceiling, paint, electrical and plumbing — with clear prices
+        for pick-up or delivery.
+      </p>
+      <div class="actions">
+        <a class="btn btn-primary" routerLink="/order">Start an order</a>
+        <a class="btn btn-ghost" routerLink="/" fragment="categories">Shop by category</a>
+      </div>
+      <dl class="stats">
+        <div><dt>{{ totalCategories }}</dt><dd>Product lines</dd></div>
+        <div><dt>{{ totalItems }}+</dt><dd>Items &amp; sizes</dd></div>
+        <div><dt>2</dt><dd>Price options</dd></div>
+      </dl>
+    </div>
+
+    <aside class="board" aria-label="Featured prices">
+      <header>
+        <span>Today's prices</span>
+        <em>{{ price.label() }}</em>
+      </header>
+      <ul>
+        @for (f of featured; track f.product.name + f.product.size) {
+          <li>
+            <a class="item" [routerLink]="['/product', f.product.slug]">
+              <app-product-image [src]="f.product.image" [fallback]="f.product.imageFallback" [alt]="f.product.name" icon="box" />
+              <div>
+              <strong>{{ f.product.name }}</strong>
+              <small>{{ f.product.size }}</small>
+              </div>
+            </a>
+            <span class="amount">₱{{ price.priceOf(f.product) | number: '1.2-2' }}<small>/{{ f.product.unit ?? 'pc' }}</small></span>
+          </li>
+        }
+      </ul>
+      <a routerLink="/order" class="board-link">Order from all {{ totalItems }} items →</a>
+    </aside>
+  </div>
+</section>
